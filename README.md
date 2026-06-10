@@ -6,6 +6,8 @@ This repository keeps the implemented detection pipeline focused and reproducibl
 
 ## Dataset
 
+Where to download the data from: https://public.roboflow.com/object-detection/aquarium
+
 The local dataset is the Roboflow Aquarium object-detection export in TensorFlow CSV format:
 
 ```text
