@@ -139,7 +139,7 @@ class RoIHeads(nn.Module):
 
             gt_boxes_in_image = gt_boxes[img_id]
             if gt_boxes_in_image.numel() == 0:
-                gt_boxes_in_image = torch.zeros((1, 4)).to(torch.device("cuda:0"))
+                gt_boxes_in_image = torch.zeros((1, 4), dtype=proposals[img_id].dtype, device=proposals[img_id].device)
             matched_gt_boxes.append(gt_boxes_in_image[matched_idxs[img_id]])
 
         regression_targets = self.box_coder.encode(matched_gt_boxes, proposals)
@@ -199,15 +199,11 @@ class RoIHeads(nn.Module):
         return all_boxes, all_scores, all_labels
 
     def forward(self, features, proposals, image_shapes, targets=None):
-       
-
-        proposals, matched_idxs, labels, regression_targets = self.select_training_samples(proposals, targets)
-        # if self.training:
-        #     proposals, matched_idxs, labels, regression_targets = self.select_training_samples(proposals, targets)
-        # else:
-        #     labels = None
-        #     regression_targets = None
-        #     matched_idxs = None
+        if self.training:
+            proposals, matched_idxs, labels, regression_targets = self.select_training_samples(proposals, targets)
+        else:
+            labels = None
+            regression_targets = None
         shape = image_shapes.shape[-2:]
         image_shapes_ = [shape for _ in range(len(image_shapes))]
 
@@ -219,12 +215,11 @@ class RoIHeads(nn.Module):
         result = []
         losses = {}
         
-        # if self.training:
-        loss_classifier, loss_box_reg = fastrcnn_loss(class_logits, box_regression, labels, regression_targets)
-        losses = {"loss_classifier": loss_classifier, "loss_box_reg": loss_box_reg}
+        if self.training:
+            loss_classifier, loss_box_reg = fastrcnn_loss(class_logits, box_regression, labels, regression_targets)
+            losses = {"loss_classifier": loss_classifier, "loss_box_reg": loss_box_reg}
         
         if not self.training:
-            labels = None
             boxes, scores, labels = self.postprocess_detections(class_logits, box_regression, proposals, image_shapes)
             num_images = len(boxes)
             for i in range(num_images):

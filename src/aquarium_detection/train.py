@@ -36,7 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--batch-size", default=32, type=int)
     parser.add_argument("--epochs", default=26, type=int)
-    parser.add_argument("--lr", default=0.05, type=float)
+    parser.add_argument("--lr", default=0.0025, type=float)
     parser.add_argument("--weight-decay", default=1e-5, type=float, dest="weight_decay")
     parser.add_argument("--num-workers", default=4, type=int)
     parser.add_argument("--num-classes", default=NUM_CLASSES, type=int)
@@ -89,7 +89,7 @@ def main(args: argparse.Namespace) -> None:
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 25], gamma=0.1)
 
     if args.resume:
-        checkpoint = torch.load(args.resume, map_location="cpu")
+        checkpoint = torch.load(args.resume, map_location="cpu", weights_only=False)
         model.load_state_dict(checkpoint["model"])
         if not args.test_only:
             optimizer.load_state_dict(checkpoint["optimizer"])
@@ -126,7 +126,7 @@ def main(args: argparse.Namespace) -> None:
             "model": model.state_dict(),
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
-            "args": args,
+            "args": vars(args),
             "epoch": epoch,
         }
         latest_path = os.path.join(args.output_dir, "checkpoint_latest.pth")

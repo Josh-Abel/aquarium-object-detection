@@ -14,9 +14,8 @@ class AnchorGenerator(nn.Module):
     # For every (aspect_ratios, scales) combination, output a zero-centered anchor with those values.
     # This method assumes aspect ratio = height / width for an anchor.
     def generate_anchors(self, scales,aspect_ratios):
-        device = torch.device("cuda:0")
-        scales = torch.as_tensor(scales).to(device)
-        aspect_ratios = torch.as_tensor(aspect_ratios).to(device)
+        scales = torch.as_tensor(scales, dtype=torch.float32)
+        aspect_ratios = torch.as_tensor(aspect_ratios, dtype=torch.float32)
         h_ratios = torch.sqrt(aspect_ratios)
         w_ratios = 1 / h_ratios
 
@@ -32,10 +31,8 @@ class AnchorGenerator(nn.Module):
 
     # For every combination of (a, (g, s), i) in (self.cell_anchors, zip(grid_sizes, strides), 0:2),
     # output g[i] anchors that are s[i] distance apart in direction i, with the same dimensions as a.
-    def grid_anchors(self, grid_sizes, strides):
+    def grid_anchors(self, grid_sizes, strides, cell_anchors):
         anchors = []
-        cell_anchors = self.cell_anchors
-
 
         for size, stride, base_anchors in zip(grid_sizes, strides, cell_anchors):
             grid_height, grid_width = size
@@ -60,15 +57,16 @@ class AnchorGenerator(nn.Module):
         grid_sizes = [feature_map.shape[-2:] for feature_map in feature_maps]
         image_size = image_list.shape[-2:]
 
-        device = torch.device("cuda:0")
+        device = image_list.device
+        cell_anchors = [cell_anchor.to(device) for cell_anchor in self.cell_anchors]
         strides = [
             [
-                torch.empty(()).fill_(image_size[0] // g[0]).to(device),
-                torch.empty(()).fill_(image_size[1] // g[1]).to(device),
+                torch.empty((), device=device).fill_(image_size[0] // g[0]),
+                torch.empty((), device=device).fill_(image_size[1] // g[1]),
             ]
             for g in grid_sizes
         ]
-        anchors_over_all_feature_maps = self.grid_anchors(grid_sizes, strides)
+        anchors_over_all_feature_maps = self.grid_anchors(grid_sizes, strides, cell_anchors)
         anchors = []
         for _ in range(len(image_list)):
             anchors_in_image = [anchors_per_feature_map for anchors_per_feature_map in anchors_over_all_feature_maps]

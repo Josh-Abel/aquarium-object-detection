@@ -73,7 +73,7 @@ The evaluation path uses COCO-style bounding-box metrics through `pycocotools`, 
 - mAP at IoU `0.75`
 - Average recall metrics
 
-Final numeric metrics are intentionally omitted until evaluation is rerun from this cleaned pipeline.
+The cleaned training/evaluation code can regenerate these metrics when a validated checkpoint is available. The archived results below document working runs from the original implementation; the exact training logs and weights are not included.
 
 ## Results
 
@@ -82,6 +82,42 @@ Demo outputs:
 - Multi Class Multi Object Detection: https://youtube.com/shorts/rv-Fisr1evg?feature=share
 - Single Class Multi Object Detection: https://youtube.com/shorts/YNGHkSCyJsk?feature=share
 - Single Class Single Object Detection: https://youtu.be/938D9_5eWoI
+
+Archived evaluation results:
+
+| Model variant | mAP `0.50:0.95` | mAP `0.50` | mAP `0.75` | AR `maxDets=100` |
+| --- | ---: | ---: | ---: | ---: |
+| Single-class multi-object detector | 0.162 | 0.454 | 0.072 | 0.421 |
+| Multi-class multi-object detector | 0.095 | 0.274 | 0.034 | 0.289 |
+
+Single-shark prototype validation summary:
+
+| Metric | Value |
+| --- | ---: |
+| Classification accuracy | 0.8860 |
+| Mean IoU | 0.1891 |
+| Bounding-box accuracy | 0.0965 |
+| Validation loss | 0.4420 |
+
+### Example Predictions
+
+Single-object shark detection:
+
+![Single-object shark prediction](assets/examples/single_object_shark_prediction.png)
+
+Single-class multi-object detection:
+
+![Single-class multi-object metrics](assets/examples/single_class_multi_object_metrics.png)
+![Single-class multi-object prediction](assets/examples/single_class_multi_object_prediction.png)
+
+Multi-class multi-object detection:
+
+![Multi-class multi-object metrics](assets/examples/multi_class_multi_object_metrics.png)
+![Multi-class multi-object prediction](assets/examples/multi_class_multi_object_prediction.png)
+
+External video inference frame:
+
+![Video inference frame](assets/examples/video_inference_frame.png)
 
 The trained model weights, raw datasets, and source videos are not committed because they are large and should stay outside GitHub.
 
@@ -95,7 +131,7 @@ Create an environment and install dependencies:
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e .
+pip install .
 ```
 
 Add the TensorFlow CSV dataset under `data/`, then convert the CSV annotations to COCO JSON:
@@ -111,8 +147,10 @@ Train the final detector:
 python -m aquarium_detection.train \
   --data-path "data/Aquarium Combined.v2-raw-1024.tensorflow" \
   --output-dir outputs/faster_rcnn_mobilenetv3 \
-  --batch-size 32 \
-  --epochs 26
+  --batch-size 4 \
+  --num-workers 0 \
+  --epochs 26 \
+  --lr 0.0025
 ```
 
 Evaluate a checkpoint on the held-out validation split:
@@ -120,7 +158,7 @@ Evaluate a checkpoint on the held-out validation split:
 ```bash
 python -m aquarium_detection.train \
   --data-path "data/Aquarium Combined.v2-raw-1024.tensorflow" \
-  --resume models/best_model.pth \
+  --resume outputs/faster_rcnn_mobilenetv3/best_model.pth \
   --output-dir outputs/evaluation \
   --test-only \
   --visualize
@@ -130,7 +168,7 @@ Run inference on an external video:
 
 ```bash
 python -m aquarium_detection.infer_video \
-  --checkpoint models/best_model.pth \
+  --checkpoint outputs/faster_rcnn_mobilenetv3/best_model.pth \
   --input data/videos/aquarium_input.mp4 \
   --output outputs/video_predictions.mp4 \
   --score-threshold 0.5
@@ -163,7 +201,7 @@ aquarium_object_detection/
 - Dataset files are not included.
 - Trained `.pth` model weights are not included.
 - Source videos are linked, not committed.
-- A reproducible final metric table should be added after rerunning evaluation.
+- A reproducible final metric table should be added after a validated training run produces reliable detections.
 - The final detector uses axis-aligned boxes only; oriented bounding boxes were not implemented.
 - The legacy single-shark prototype is preserved for context but is not the primary final pipeline.
 
@@ -171,6 +209,6 @@ aquarium_object_detection/
 
 - Add a small public sample dataset or scripted dataset download step.
 - Add final trained weights through GitHub Releases or another external artifact host.
-- Add a reproducible metrics table after retraining from the cleaned code.
+- Add a reproducible metrics table after retraining produces a validated checkpoint.
 - Add automated smoke tests for dataset loading and checkpoint inference.
 - Extend to oriented bounding boxes if that detection format becomes useful for the dataset.
