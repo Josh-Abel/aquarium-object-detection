@@ -1,0 +1,52 @@
+# System files
+.DS_Store
+
+# Python caches/build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments
+.env
+.venv/
+venv/
+
+# Local datasets. Keep only the documentation/placeholder files in git.
+data/*
+!data/README.md
+!data/.gitkeep
+
+# Local model artifacts. Store large weights outside git or in GitHub Releases.
+models/*
+!models/README.md
+!models/.gitkeep
+
+# Generated training/evaluation outputs.
+outputs/*
+!outputs/README.md
+!outputs/.gitkeep
+
+runs/
+tensorboard_logs/
+wandb/
+
+# Model and data artifacts
+*.pth
+*.pt
+*.ckpt
+*.pkl
+*.onnx
+*.zip
+*.tar
+*.tar.gz
+
+# Video artifacts
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+.ipynb_checkpoints/
