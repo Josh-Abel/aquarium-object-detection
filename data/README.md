@@ -1,5 +1,7 @@
 # Data
 
+Where to download the data from: https://public.roboflow.com/object-detection/aquarium
+
 Place datasets here. The local project data is the Roboflow Aquarium object-detection export in TensorFlow CSV format:
 
 ```text
