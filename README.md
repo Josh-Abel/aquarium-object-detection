@@ -77,23 +77,15 @@ Final numeric metrics are intentionally omitted until evaluation is rerun from t
 
 ## Results
 
-Implemented outputs that are present in this repo:
+Demo outputs:
 
-- MobileNetV3 classification baseline screenshots in `assets/classification_examples/`.
-- Project demo video links in `assets/demo_video_links.md`.
+- Multi Class Multi Object Detection: https://youtube.com/shorts/rv-Fisr1evg?feature=share
+- Single Class Multi Object Detection: https://youtube.com/shorts/YNGHkSCyJsk?feature=share
+- Single Class Single Object Detection: https://youtu.be/938D9_5eWoI
 
 The trained model weights, raw datasets, and source videos are not committed because they are large and should stay outside GitHub.
 
-## Example Predictions
-
-Sample screenshots from the MobileNetV3 ImageNet baseline:
-
-![Classification baseline output 1](assets/classification_examples/output1.png)
-![Classification baseline output 2](assets/classification_examples/output2.png)
-![Classification baseline output 3](assets/classification_examples/output3.png)
-![Classification baseline output 4](assets/classification_examples/output4.png)
-
-Detection demo links are listed in [`assets/demo_video_links.md`](assets/demo_video_links.md).
+Additional video links are tracked in [`assets/demo_video_links.md`](assets/demo_video_links.md).
 
 ## How To Run
 
